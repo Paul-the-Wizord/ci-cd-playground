@@ -4,15 +4,15 @@ new App({
   target: document.body,
   props: {
     // What's your name?
-    name: "Paul Gondolf",
+    name: "Paul",
     // In the following fiels you can either give a single string,
     // or an array of bullet points
 
     // What do you associate with the term 'CI/CD'?
-    associations: ["Continuous Integration and Continuous Development"],
+    associations: ["Continuous Integration and Continuous Deployment."],
     // Which CI/CD tools do you use in your project?
     tools: "No, not yet.",
     // What do you want to learn in this workshop?
-    expectations: ["Not sure yet (aside learning about the Buzzwords)"]
+    expectations: ["Not sure yet (aside learning about the buzzwords)"]
   },
 });

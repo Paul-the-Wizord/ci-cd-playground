@@ -29,11 +29,6 @@ pipeline {
 	    }
 	}
 	
-	post {
-	    always {
-		junit '**/reports/**/*.xml'
-	    }
-	}
 
         stage('deploy') {
             steps {
@@ -60,5 +55,11 @@ pipeline {
                     userMetadata: []
             }
         }
+
+	post {
+	    always {
+		junit '**/reports/**/*.xml'
+	    }
+	}
     }
 }

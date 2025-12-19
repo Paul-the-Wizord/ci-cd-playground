@@ -28,6 +28,12 @@ pipeline {
 		sh 'yarn test:e2e'
 	    }
 	}
+	
+	post {
+	    always {
+		junit '**/reports/**/*.xml'
+	    }
+	}
 
         stage('deploy') {
             steps {

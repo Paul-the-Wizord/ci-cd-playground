@@ -4,12 +4,17 @@ on:
   push:
   pull_request:
   workflow_dispatch:
+    inputs:
+      tag_name:
+        type: string
+        default: ""
+        description: "Optional: the name of the tag to create (e.g. v1.2.3)"
 
 permissions:
   checks: write
   pull-requests: write
   id-token: write
-  contents: read
+  contents: write     # write so we can push tags
   pages: write
 
 jobs:
@@ -19,12 +24,31 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Optionally create a tag if tag_name was provided in workflow_dispatch
+      - name: Create tag
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.tag_name != '' }}
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          echo "Creating tag ${TAG_NAME} on $(git rev-parse HEAD)"
+          git tag "${TAG_NAME}"
+          git push origin "${TAG_NAME}"
+        env:
+          TAG_NAME: ${{ inputs.tag_name }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Set VERSION from the ref:
+      # - if this is a tag push or we just created+ pushed a tag, github.ref_type == 'tag'
+      # - otherwise fall back to a dev version with short SHA
       - name: Set VERSION
         run: |
           if [ "${{ github.ref_type }}" = "tag" ]; then
-            VERSION="${{ github.ref_name }}"
+            VERSION="${{ github.ref_name }}"   # e.g. v1.2.3
+          elif [ -n "${{ inputs.tag_name }}" ]; then
+            VERSION="${{ inputs.tag_name }}"   # manual tag from workflow_dispatch
           else
-            VERSION="dev-untagged"
+            VERSION="dev-${GITHUB_SHA::7}"
           fi
 
           echo "VERSION=$VERSION"
@@ -33,6 +57,7 @@ jobs:
       - name: Show version
         run: echo "Building version: $VERSION"
 
+      # Github Actions runner already has Node/Yarn; you can pin with actions/setup-node if you want
       - name: Install
         run: yarn
 
@@ -51,4 +76,4 @@ jobs:
         uses: mikepenz/action-junit-report@v5
         if: success() || failure()
         with:
-          report_paths: '**/reports/**/*.xml'
+          report_paths: 'reports/*.xml'

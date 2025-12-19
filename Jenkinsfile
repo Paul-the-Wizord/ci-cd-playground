@@ -56,10 +56,11 @@ pipeline {
             }
         }
 
+    }
+
 	post {
 	    always {
 		junit '**/reports/**/*.xml'
 	    }
 	}
-    }
 }
